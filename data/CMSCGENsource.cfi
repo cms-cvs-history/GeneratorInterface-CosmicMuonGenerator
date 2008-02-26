@@ -1,6 +1,6 @@
  source = CosMuoGenSource {
     double MinP = 3.
-    double MinP_CMS = 3. #WARNING: should be the same as MinP if you are not sure what you are doing!
+    double MinP_CMS = -1. #negative means MinP_CMS = MinP. Only change this if you know what you are doing!
     double MaxP = 3000.
     double MinTheta = 0.
     double MaxTheta = 84.26
