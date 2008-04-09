@@ -1,0 +1,19 @@
+ module cosmics = CosMuoGenProducer {
+    double MinP = 3.
+    double MinP_CMS = -1. #negative means MinP_CMS = MinP. Only change this if you know what you are doing!
+    double MaxP = 3000.
+    double MinTheta = 0.
+    double MaxTheta = 84.26
+    double MinPhi = 0.
+    double MaxPhi = 360.
+    double MinT0 = -12.5
+    double MaxT0 = 12.5
+    double ElossScaleFactor = 1.0
+    double RadiusOfTarget = 8000.
+    double ZDistOfTarget = 15000.
+    bool TrackerOnly = false
+    bool TIFOnly_constant = false
+    bool TIFOnly_linear = false
+    bool MTCCHalf = false
+    bool Verbosity = false
+  }
