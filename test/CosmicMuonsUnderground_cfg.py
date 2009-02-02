@@ -16,13 +16,10 @@ process.CMSCGEN_out = cms.OutputModule("PoolOutputModule",
 )
 
 process.outpath = cms.EndPath(process.CMSCGEN_out)
-#process.CosMuoGenSource.MinP = 10.
-process.CosMuoGenSource.MinP = 3.
-#process.CosMuoGenSource.MinP = 20.
 
+process.CosMuoGenSource.MinP = 10.
 
-#process.CosMuoGenSource.MaxTheta = 80.
-process.CosMuoGenSource.MaxTheta = 84.
+process.CosMuoGenSource.MaxTheta = 80.
 
 # Plug z-position [mm] (default=-14000.) 
 #process.CosMuoGenSource.PlugVz = -33000.;
