@@ -11,6 +11,8 @@
     double ElossScaleFactor = 1.0
     double RadiusOfTarget = 8000.
     double ZDistOfTarget = 15000.
+    double PlugVx = 0.
+    double PlugVz = -14000.                
     bool TrackerOnly = false
     bool TIFOnly_constant = false
     bool TIFOnly_linear = false
