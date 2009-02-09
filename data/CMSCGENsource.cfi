@@ -13,6 +13,8 @@
     double ZDistOfTarget = 15000.
     double PlugVx = 0.
     double PlugVz = -14000.                
+    double MinEnu = 10.                
+    double MaxEnu = 10000.                
     bool TrackerOnly = false
     bool TIFOnly_constant = false
     bool TIFOnly_linear = false
