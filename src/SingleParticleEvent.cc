@@ -140,7 +140,7 @@ void SingleParticleEvent::propagate(double ElossScaleFac, double RadiusTarget, d
     while (continuePropagation){
       if (Vy < -acceptR) continuePropagation = false;
       //if (absVz() < acceptZ && rVxy() < acceptR){
-      if (fabs(Vz - Z_CentrTargetEff) < acceptZ && rVxyTmp() < acceptR){
+      if (fabs(Vz - Z_CentrTargetEff) < acceptZ && rVxy() < acceptR){
         HitTarget = true;
         continuePropagation = false;
       }
