@@ -20,6 +20,7 @@ void SingleParticleEvent::propagate(double ElossScaleFac, double RadiusTarget, d
   double RadiusTargetEff = RadiusTarget;
   double Z_DistTargetEff = Z_DistTarget;
   double Z_CentrTargetEff = Z_CentrTarget;
+
   if(TrackerOnly==true){
     RadiusTargetEff = RadiusTracker;
     Z_DistTargetEff = Z_DistTracker;
