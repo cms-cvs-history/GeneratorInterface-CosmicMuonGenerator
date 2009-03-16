@@ -31,7 +31,8 @@ public:
     MinP_CMS =     MinP;
     MaxP =   3000.;
     MinTheta =  0.*Deg2Rad;
-    MaxTheta = 84.26*Deg2Rad;
+    //MaxTheta = 84.26*Deg2Rad;
+    MaxTheta = 89.0*Deg2Rad;
     MinPhi =    0.*Deg2Rad;
     MaxPhi =  360.*Deg2Rad;
     MinT0  = -12.5;

@@ -149,8 +149,8 @@ void CosmicMuonGenerator::terminate(){
     double area = 1.e-6*Pi*SurfaceRadius*SurfaceRadius; // area on surface [m^2] 
     std::cout << "       area of initial cosmics on Surface + PlugWidth:   " << area << " m^2" << std::endl;
     std::cout << "       depth of CMS detector (from Surface, without PlugWidth)):   " << SurfaceOfEarth/1000 << " m" << std::endl;
-       
-    if(n100cos>0){
+    //OneMuoEvt.theta()*Rad2Deg
+    if(n100cos>0 && MaxTheta<84.26*Deg2Rad){
       // rate: corrected for area and selection-Eff. and normalized to known flux, integration over solid angle (dOmega) is implicit
       // flux is normalised with respect to known flux of vertical 100GeV muons in area at suface level 
       // rate seen by detector is lower than rate at surface area, so has to be corrected for selection-Eff.
@@ -176,6 +176,8 @@ void CosmicMuonGenerator::terminate(){
       std::cout << std::endl;
       if (MinP > 100.)
 	std::cout << " !!! MinP > 100 GeV. Cannot apply normalisation!" << std::endl;
+      else if (MaxTheta > 84.26*Deg2Rad)
+	std::cout << " !!! Note: generated cosmics exceed parameterisation. No flux calculated!" << std::endl;
       else 
 	std::cout << " !!! Not enough statistics to apply normalisation (rate=1 +- 1) !!!" << std::endl;
     } 
