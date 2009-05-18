@@ -54,11 +54,15 @@ const double Z_DistTracker = 2800.; // [mm]
 //const double RadiusTarget = RadiusCMS; // [mm]  //now controlled by cfg-file!!!
 //const double Z_DistTarget = Z_DistCMS; // [mm]  //now controlled by cfg-file!!!
 
-
+const double MuProdAlt = 7.e6; // 7km in [mm]
 
 //define different materials
 enum {Unknown=0, Plug, Wall, Air, Clay, Rock};
 
+//Multi Muon relevant parameters
+const double NorthCMSzDeltaPhi = 3./8.*Pi; //rad (Pi/2 if CMS -x = North)
+const double maxMultiMuDist = 30000.; //30000.; //30m [mm]
+const int max_trials = 1000000;
 
 
 #endif

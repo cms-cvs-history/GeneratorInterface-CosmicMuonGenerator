@@ -11,8 +11,16 @@
 #include "GeneratorInterface/CosmicMuonGenerator/interface/CosmicMuonParameters.h"
 #include "GeneratorInterface/CosmicMuonGenerator/interface/SingleParticleEvent.h"
 #include <iostream>
+#include <string>
+#include <vector>
 #include "TRandom2.h"
+#include "TFile.h"
+#include "TTree.h"
 
+#include "GeneratorInterface/CosmicMuonGenerator/interface/sim.h"
+
+
+using namespace std;
 
 
 // class definitions
@@ -42,6 +50,8 @@ public:
     ZDistOfTarget = 15000.;
     ZCentrOfTarget = 0.;
     TrackerOnly = false;
+    MultiMuon = false;
+    MultiMuonFileName = "dummy.root";
     TIFOnly_constant = false;
     TIFOnly_linear = false;
     MTCCHalf = false;
@@ -77,9 +87,37 @@ public:
     delete Cosmics;
   }
   // event with one particle
-  //SingleParticleEvent OneMuoEvt;
   SingleParticleEvent OneMuoEvt;
- 
+  double EventWeight; //for multi muon events
+  TFile* MultiIn; //file to be read in
+  TTree* MultiTree; //tree of file with multi muon events
+  sim* SimTree; //class to acces tree branches
+  ULong64_t SimTreeEntries;
+  ULong64_t SimTree_jentry;
+  int NcloseMultiMuonEvents;
+
+  int Id_at;
+  double Px_at; double Py_at; double Pz_at; 
+  double E_at; 
+  //double M_at;
+  double Vx_at; double Vy_at; double Vz_at; 
+  double T0_at;
+  
+  vector<int> Id_sf;
+  vector<double> Px_sf; vector<double> Py_sf; vector<double> Pz_sf; 
+  vector<double> E_sf; 
+  //vector<double> M_sf;
+  vector<double> Vx_sf; vector<double> Vy_sf; vector<double> Vz_sf; 
+  vector<double> T0_sf;
+  
+  vector<int> Id_ug;
+  vector<double> Px_ug; vector<double> Py_ug; vector<double> Pz_ug;
+  vector<double> E_ug; 
+  //vector<double> M_ug;
+  vector<double> Vx_ug; vector<double> Vy_ug; vector<double> Vz_ug;
+  vector<double> T0_ug;
+
+
  
 
 private:
@@ -104,6 +142,8 @@ private:
   double ZDistOfTarget; // z-length of target-cylinder which cosmics HAVE to hit [mm], default is CMS-dimensions
   double ZCentrOfTarget; // z-position of centre of target-cylinder which cosmics HAVE to hit [mm], default is Nominal Interaction Point (=0)
   bool   TrackerOnly; //if set to "true" detector with tracker-only setup is used, so no material or B-field outside is considerd
+  bool   MultiMuon; //read in multi-muon events from file instead of generating single muon events
+  std::string MultiMuonFileName; //file containing multi muon events, to be read in
   bool   TIFOnly_constant; //if set to "true" cosmics can also be generated below 2GeV with unphysical constant energy dependence
   bool   TIFOnly_linear; //if set to "true" cosmics can also be generated below 2GeV with unphysical linear energy dependence
   bool   MTCCHalf; //if set to "true" muons are sure to hit half of CMS important for MTCC, 
@@ -150,6 +190,8 @@ public:
   void setZDistOfTarget(double Z);
   void setZCentrOfTarget(double Z);
   void setTrackerOnly(bool Tracker);
+  void setMultiMuon(bool MultiMu);
+  void setMultiMuonFileName(std::string MultiMuonFileName);
   void setTIFOnly_constant(bool TIF);
   void setTIFOnly_linear(bool TIF);
   void setMTCCHalf(bool MTCC);
@@ -166,5 +208,7 @@ public:
   double getRate();
   // generate next event/muon
   void nextEvent();
+  // generate next multi muon event
+  bool nextMultiEvent();
 };
 #endif
