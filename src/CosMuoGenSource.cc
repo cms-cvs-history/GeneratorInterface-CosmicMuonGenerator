@@ -89,26 +89,29 @@ bool edm::CosMuoGenSource::produce(Event &e)
   }
  
   std::cout << "CosMuoGenSource.cc: CosMuoGen->EventWeight=" << CosMuoGen->EventWeight 
-	    << " CosMuoGen: Nmuons=" << CosMuoGen->Id_sf.size() << std::endl; 
-  std::cout << "CosMuoGen->Vx_at=" << CosMuoGen->Vx_at 
-	    << "   CosMuoGen->Vy_at=" << CosMuoGen->Vy_at
-	    << "   CosMuoGen->Vz_at=" << CosMuoGen->Vz_at << std::endl;
-  std::cout << "   Px=" << CosMuoGen->Px_at
-	    << "   Py=" << CosMuoGen->Py_at
-	    << "   Pz=" << CosMuoGen->Pz_at << std::endl;
+	    << "  CosMuoGen: Nmuons=" << CosMuoGen->Id_sf.size() << std::endl; 
+  std::cout << "CosMuoGen->Id_at=" << CosMuoGen->Id_at
+	    << "  CosMuoGen->Vx_at=" << CosMuoGen->Vx_at 
+	    << "  CosMuoGen->Vy_at=" << CosMuoGen->Vy_at
+	    << "  CosMuoGen->Vz_at=" << CosMuoGen->Vz_at << std::endl;
+  std::cout << "  Px=" << CosMuoGen->Px_at
+	    << "  Py=" << CosMuoGen->Py_at
+	    << "  Pz=" << CosMuoGen->Pz_at << std::endl;
   for (unsigned int i=0; i<CosMuoGen->Id_sf.size(); ++i) {
-    std::cout << "Vx_sf[" << i << "]=" << CosMuoGen->Vx_sf[i] 
-	      << "   Vy_sf=" << CosMuoGen->Vy_sf[i]
-	    << "   Vz_sf=" << CosMuoGen->Vz_sf[i]
-	    << "   Px_sf=" << CosMuoGen->Px_sf[i]
-	    << "   Py_sf=" << CosMuoGen->Py_sf[i]
-	    << "   Pz_sf=" << CosMuoGen->Pz_sf[i] << std::endl;
-    std::cout << "Vx_ug[" << i << "]=" << CosMuoGen->Vx_ug[i] 
-	    << "   Vy_ug=" << CosMuoGen->Vy_ug[i]
-	    << "   Vz_ug=" << CosMuoGen->Vz_ug[i]
-	    << "   Px_ug=" << CosMuoGen->Px_ug[i]
-	    << "   Py_ug=" << CosMuoGen->Py_ug[i]
-	    << "   Pz_ug=" << CosMuoGen->Pz_ug[i] << std::endl;
+    std::cout << "Id_sf[" << i << "]=" << CosMuoGen->Id_sf[i]
+	      << "  Vx_sf[" << i << "]=" << CosMuoGen->Vx_sf[i]
+	      << "  Vy_sf=" << CosMuoGen->Vy_sf[i]
+	      << "  Vz_sf=" << CosMuoGen->Vz_sf[i]
+	      << "  Px_sf=" << CosMuoGen->Px_sf[i]
+	      << "  Py_sf=" << CosMuoGen->Py_sf[i]
+	      << "  Pz_sf=" << CosMuoGen->Pz_sf[i] << std::endl;
+    std::cout << "Id_ug[" << i << "]=" << CosMuoGen->Id_ug[i] 
+	      << "  Vx_ug[" << i << "]=" << CosMuoGen->Vx_ug[i] 
+	      << "  Vy_ug=" << CosMuoGen->Vy_ug[i]
+	      << "  Vz_ug=" << CosMuoGen->Vz_ug[i]
+	      << "  Px_ug=" << CosMuoGen->Px_ug[i]
+	      << "  Py_ug=" << CosMuoGen->Py_ug[i]
+	      << "  Pz_ug=" << CosMuoGen->Pz_ug[i] << std::endl;
   }
 
 
@@ -132,7 +135,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
       new HepMC::GenParticle(p_sf,CosMuoGen->Id_sf[i], 3); //Comment daughter particle
     Vtx_at->add_particle_out(Part_sf_in);
     
-    HepMC::GenVertex* Vtx_sf = new  HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_sf[i]/10.,                             CosMuoGen->Vy_sf[i]/10., CosMuoGen->Vz_sf[i]/10., CosMuoGen->T0_sf[i]/10.));
+    HepMC::GenVertex* Vtx_sf = new HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_sf[i]/10.,                             CosMuoGen->Vy_sf[i]/10., CosMuoGen->Vz_sf[i]/10., CosMuoGen->T0_sf[i]/10.));
     HepMC::GenParticle* Part_sf_out =
       new HepMC::GenParticle(p_sf,CosMuoGen->Id_sf[i], 3); //Comment daughter particle
     
@@ -141,12 +144,13 @@ bool edm::CosMuoGenSource::produce(Event &e)
     
     fEvt->add_vertex(Vtx_sf); //one per muon
 
-    HepMC::GenVertex* Vtx_ug = new  HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_ug[i]/10.,                             CosMuoGen->Vy_ug[i]/10., CosMuoGen->Vz_ug[i]/10., CosMuoGen->T0_ug[i]/10.));
-    Vtx_ug->add_particle_in(Part_sf_out);
+    HepMC::GenVertex* Vtx_ug = new HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_ug[i]/10.,                             CosMuoGen->Vy_ug[i]/10., CosMuoGen->Vz_ug[i]/10., CosMuoGen->T0_ug[i]/10.));
     
     HepMC::FourVector p_ug(CosMuoGen->Px_ug[i],CosMuoGen->Py_ug[i],CosMuoGen->Pz_ug[i],CosMuoGen->E_ug[i]);
     HepMC::GenParticle* Part_ug =
       new HepMC::GenParticle(p_ug,CosMuoGen->Id_ug[i], 1);//Final state daughter particle
+
+    Vtx_ug->add_particle_in(Part_sf_out);
     Vtx_ug->add_particle_out(Part_ug);
 
     fEvt->add_vertex(Vtx_ug); //one per muon

@@ -263,10 +263,14 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       P_mu[imu] = sqrt(Px_mu[imu]*Px_mu[imu] + Py_mu[imu]*Py_mu[imu] + Pz_mu[imu]*Pz_mu[imu]);
       
       if (P_mu[imu] < MinP_CMS) continue;
+      else if (SimTree->particle__ParticleID[imu] != 5 &&
+	       SimTree->particle__ParticleID[imu] != 6) continue;
       else NmuPmin++;
-
+      
       for (int jmu=0; jmu<imu; ++jmu) {
 	if (P_mu[jmu] < MinP_CMS) continue;
+	if (SimTree->particle__ParticleID[imu] != 5 &&
+	    SimTree->particle__ParticleID[imu] != 6) continue;
 	MuMuDist = 0.1*sqrt( (SimTree->particle__x[imu]-SimTree->particle__x[jmu])*
 			     (SimTree->particle__x[imu]-SimTree->particle__x[jmu]) 
 			     +(SimTree->particle__y[imu]-SimTree->particle__y[jmu])*
@@ -414,7 +418,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
     double pPh1=0.25, pPh2=0.7, pPh3=0.05;
 
   
-
+  
     double trials = 0;
     Vx_mu.resize(nmuons); Vy_mu.resize(nmuons); Vz_mu.resize(nmuons);
     do { //while (Id_sf.size() < 2 && trials < max_trials)
@@ -499,6 +503,11 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	Vz_mu[imu] = Vz_at + ( SimTree->particle__x[imu]*cos(NorthCMSzDeltaPhi)
 			       +SimTree->particle__y[imu]*sin(NorthCMSzDeltaPhi) )*10; //[mm] (Corsika cm to CMSCGEN mm)
 
+
+	//only muons
+	if (SimTree->particle__ParticleID[imu] != 5 &&
+	    SimTree->particle__ParticleID[imu] != 6) continue;
+
 	//check here if at least 2 muons make it to the target sphere
 	double Vxz_mu = sqrt(Vx_mu[imu]*Vx_mu[imu] + Vz_mu[imu]*Vz_mu[imu]);
 	theta_mu_max = atan((Vxz_mu+Target3dRadius)/(h-Target3dRadius));
@@ -510,14 +519,15 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	  double rotPhi = PhiV + Pi; if (rotPhi > TwoPi) rotPhi -= TwoPi;
 	  double Phi = atan2(Px_mu[imu],Pz_mu[imu]); //muon phi
 	  double disPhi = fabs(rotPhi - Phi); if (disPhi > Pi) disPhi = TwoPi - disPhi;
-	  if (disPhi < dPhi) NmuHitTargetSphere++;
+	  if (disPhi < dPhi) 
+	    if (P_mu[imu] > MinP_CMS) NmuHitTargetSphere++;
 	  
 	}
 
       } //end imu for loop
       
       if (NmuHitTargetSphere < 2) continue; //while (Id_sf.size() < 2) loop
-
+    
       
       T0_at = (RanGen.Rndm()*(MaxT0-MinT0) + MinT0)*SpeedOfLight; // [mm/c];
       
@@ -562,11 +572,35 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       for (int imu=0; imu<nmuons; ++imu) {
 
 	if (P_mu[imu] < MinP_CMS) continue;
-	  
+	//for the time being only muons
+	if (SimTree->particle__ParticleID[imu] != 5 &&
+	    SimTree->particle__ParticleID[imu] != 6) continue;
+	
 	Id_sf_this = SimTree->particle__ParticleID[imu];
-	if (Id_sf_this == 5) Id_sf_this = -13;
-	else if (Id_sf_this == 6) Id_sf_this = 13;
-	else Id_sf_this = 99999; //trouble
+	if (Id_sf_this == 5) Id_sf_this = -13; //mu+
+	else if (Id_sf_this == 6) Id_sf_this = 13; //mu-
+
+	else if (Id_sf_this == 1) Id_sf_this = 22; //gamma
+	else if (Id_sf_this == 2) Id_sf_this = -11; //e+
+	else if (Id_sf_this == 3) Id_sf_this = 11; //e-
+	else if (Id_sf_this == 7) Id_sf_this = 111; //pi0
+	else if (Id_sf_this == 8) Id_sf_this = 211; //pi+
+	else if (Id_sf_this == 9) Id_sf_this = -211; //pi-
+	else if (Id_sf_this == 10) Id_sf_this = 130; //KL0
+	else if (Id_sf_this == 11) Id_sf_this = 321; //K+
+	else if (Id_sf_this == 12) Id_sf_this = -321; //K-
+	else if (Id_sf_this == 13) Id_sf_this = 2112; //n
+	else if (Id_sf_this == 14) Id_sf_this = 2212; //p
+	else if (Id_sf_this == 15) Id_sf_this = -2212; //pbar
+	else if (Id_sf_this == 16) Id_sf_this = 310; //Ks0
+	else if (Id_sf_this == 17) Id_sf_this = 221; //eta
+	else if (Id_sf_this == 18) Id_sf_this = 3122; //Lambda
+
+	else {
+	  cout << "CosmicMuonGenerator.cc: Warning! Muon Id=" << Id_sf_this 
+	       << " from file read in" << endl;
+	  Id_sf_this = 99999; //trouble
+	}
 	Px_sf_this = Px_mu[imu];
 	Py_sf_this = Py_mu[imu]; //Corsika down going particles defined in -z direction!
 	Pz_sf_this = Pz_mu[imu];
