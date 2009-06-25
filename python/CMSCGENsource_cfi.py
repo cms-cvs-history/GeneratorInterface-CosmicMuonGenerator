@@ -17,6 +17,7 @@ source = cms.Source("CosMuoGenSource",
     TrackerOnly = cms.bool(False),
     MultiMuon = cms.bool(False),
     MultiMuonFileName = cms.string("dummy.root"),
+    MultiMuonFileFirstEvent = cms.int32(1),
     MinTheta = cms.double(0.0),
     MinP_CMS = cms.double(-1.0), ##negative means MinP_CMS = MinP. Only change this if you know what you are doing!
 

@@ -52,6 +52,7 @@ public:
     TrackerOnly = false;
     MultiMuon = false;
     MultiMuonFileName = "dummy.root";
+    MultiMuonFileFirstEvent = 0;
     TIFOnly_constant = false;
     TIFOnly_linear = false;
     MTCCHalf = false;
@@ -95,6 +96,7 @@ public:
   ULong64_t SimTreeEntries;
   ULong64_t SimTree_jentry;
   int NcloseMultiMuonEvents;
+  int NskippedMultiMuonEvents;
 
   int Id_at;
   double Px_at; double Py_at; double Pz_at; 
@@ -102,7 +104,15 @@ public:
   //double M_at;
   double Vx_at; double Vy_at; double Vz_at; 
   double T0_at;
-  
+  double Theta_at;
+
+
+  vector<double> Px_mu; vector<double> Py_mu; vector<double> Pz_mu;
+  vector<double> P_mu;
+  vector<double> Vx_mu; vector<double> Vy_mu; vector<double> Vz_mu;
+  double Vxz_mu;
+  vector<double> Theta_mu;
+
   vector<int> Id_sf;
   vector<double> Px_sf; vector<double> Py_sf; vector<double> Pz_sf; 
   vector<double> E_sf; 
@@ -144,6 +154,7 @@ private:
   bool   TrackerOnly; //if set to "true" detector with tracker-only setup is used, so no material or B-field outside is considerd
   bool   MultiMuon; //read in multi-muon events from file instead of generating single muon events
   std::string MultiMuonFileName; //file containing multi muon events, to be read in
+  int MultiMuonFileFirstEvent; //first multi muon event, to be read in
   bool   TIFOnly_constant; //if set to "true" cosmics can also be generated below 2GeV with unphysical constant energy dependence
   bool   TIFOnly_linear; //if set to "true" cosmics can also be generated below 2GeV with unphysical linear energy dependence
   bool   MTCCHalf; //if set to "true" muons are sure to hit half of CMS important for MTCC, 
@@ -192,6 +203,7 @@ public:
   void setTrackerOnly(bool Tracker);
   void setMultiMuon(bool MultiMu);
   void setMultiMuonFileName(std::string MultiMuonFileName);
+  void setMultiMuonFileFirstEvent(int MultiMuFile1stEvt);
   void setTIFOnly_constant(bool TIF);
   void setTIFOnly_linear(bool TIF);
   void setMTCCHalf(bool MTCC);

@@ -22,6 +22,7 @@ edm::CosMuoGenSource::CosMuoGenSource( const ParameterSet & pset, InputSourceDes
   TrackerOnly(pset.getParameter<bool>("TrackerOnly")),
   MultiMuon(pset.getParameter<bool>("MultiMuon")),
   MultiMuonFileName(pset.getParameter<std::string>("MultiMuonFileName")),
+  MultiMuonFileFirstEvent(pset.getParameter<int>("MultiMuonFileFirstEvent")),
   TIFOnly_constant(pset.getParameter<bool>("TIFOnly_constant")),
   TIFOnly_linear(pset.getParameter<bool>("TIFOnly_linear")),
   MTCCHalf(pset.getParameter<bool>("MTCCHalf")),
@@ -56,6 +57,7 @@ edm::CosMuoGenSource::CosMuoGenSource( const ParameterSet & pset, InputSourceDes
     CosMuoGen->setTrackerOnly(TrackerOnly);
     CosMuoGen->setMultiMuon(MultiMuon);
     CosMuoGen->setMultiMuonFileName(MultiMuonFileName);
+    CosMuoGen->setMultiMuonFileFirstEvent(MultiMuonFileFirstEvent);
     CosMuoGen->setTIFOnly_constant(TIFOnly_constant);
     CosMuoGen->setTIFOnly_linear(TIFOnly_linear);
     CosMuoGen->setMTCCHalf(MTCCHalf);
@@ -86,15 +88,17 @@ bool edm::CosMuoGenSource::produce(Event &e)
     if (!success) return false;
   }
  
-  std::cout << "\nCosMuoGenSource.cc: CosMuoGen->Vx_at=" << CosMuoGen->Vx_at 
+  std::cout << "CosMuoGenSource.cc: CosMuoGen->EventWeight=" << CosMuoGen->EventWeight 
+	    << " CosMuoGen: Nmuons=" << CosMuoGen->Id_sf.size() << std::endl; 
+  std::cout << "CosMuoGen->Vx_at=" << CosMuoGen->Vx_at 
 	    << "   CosMuoGen->Vy_at=" << CosMuoGen->Vy_at
-	    << "   CosMuoGen->Vz_at=" << CosMuoGen->Vz_at
-	    << "   Px=" << CosMuoGen->Px_at
+	    << "   CosMuoGen->Vz_at=" << CosMuoGen->Vz_at << std::endl;
+  std::cout << "   Px=" << CosMuoGen->Px_at
 	    << "   Py=" << CosMuoGen->Py_at
 	    << "   Pz=" << CosMuoGen->Pz_at << std::endl;
   for (unsigned int i=0; i<CosMuoGen->Id_sf.size(); ++i) {
     std::cout << "Vx_sf[" << i << "]=" << CosMuoGen->Vx_sf[i] 
-	    << "   Vy_sf=" << CosMuoGen->Vy_sf[i]
+	      << "   Vy_sf=" << CosMuoGen->Vy_sf[i]
 	    << "   Vz_sf=" << CosMuoGen->Vz_sf[i]
 	    << "   Px_sf=" << CosMuoGen->Px_sf[i]
 	    << "   Py_sf=" << CosMuoGen->Py_sf[i]
@@ -120,7 +124,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
   Vtx_at->add_particle_in(Part_at);
 
 
-  //loop here in case of multi muon events
+  //loop here in case of multi muon events (else just one iteration)
   for (unsigned int i=0; i<CosMuoGen->Id_sf.size(); ++i) {
 
     HepMC::FourVector p_sf(CosMuoGen->Px_sf[i],CosMuoGen->Py_sf[i],CosMuoGen->Pz_sf[i],CosMuoGen->E_sf[i]);
@@ -155,7 +159,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
   fEvt->set_event_number(event());
   fEvt->set_signal_process_id(13);
 
-  fEvt->weights().push_back( CosMuoGen->EventWeight ); 
+  fEvt->weights().push_back( CosMuoGen->EventWeight ); // just one event weight 
 
 
   if (cmVerbosity_) fEvt->print();

@@ -8,8 +8,9 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 )
 
 process.maxEvents = cms.untracked.PSet(
-#    input = cms.untracked.int32(500)
-    input = cms.untracked.int32(100000)
+    input = cms.untracked.int32(500)
+#    input = cms.untracked.int32(20)
+#    input = cms.untracked.int32(100000)
 )
 process.CMSCGEN_out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('cosmic.root')
@@ -32,9 +33,10 @@ process.CosMuoGenSource.MaxTheta = 89.
 #process.CosMuoGenSource.ZCentrOfTarget = 15000.; 
 
 #Read in Multi muon events or generate single muon events (MultiMuon=false = default)
-process.CosMuoGenSource.MultiMuon = True;
+##process.CosMuoGenSource.MultiMuon = True;
 #process.CosMuoGenSource.MultiMuonFileName = "MultiEventsIn.root";
 #process.CosMuoGenSource.MultiMuonFileName = "test_25gev.root";
 #process.CosMuoGenSource.MultiMuonFileName = "test_150gev.root";
-#process.CosMuoGenSource.MultiMuonFileName = "test_800gev.root";
-process.CosMuoGenSource.MultiMuonFileName = "test_3000gev.root";
+##process.CosMuoGenSource.MultiMuonFileName = "test_800gev.root";
+#process.CosMuoGenSource.MultiMuonFileName = "test_3000gev.root";
+##process.CosMuoGenSource.MultiMuonFileFirstEvent = 1;

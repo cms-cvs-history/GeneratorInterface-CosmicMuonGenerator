@@ -185,7 +185,7 @@ sim::sim(TTree *tree)
       tree = (TTree*)gDirectory->Get("sim");
 
    }
-   else std::cout << "sim::sim: tree != 0 => Alright!" << std::endl;
+   //else std::cout << "sim::sim: tree != 0 => Alright!" << std::endl;
    Init(tree);
 }
 
