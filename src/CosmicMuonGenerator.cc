@@ -101,7 +101,7 @@ void CosmicMuonGenerator::nextEvent(){
       PhiV = RanGen.Rndm()*TwoPi;
       // check phi range (for a sphere with Target3dRadius around the target)
       double dPhi = Pi; if (RxzV > Target3dRadius) dPhi = asin(Target3dRadius/RxzV);
-      double rotPhi = PhiV + Pi; if (rotPhi > TwoPi) rotPhi -= TwoPi;
+      double rotPhi = PhiV + Pi; if (rotPhi > Pi) rotPhi -= TwoPi;
       double disPhi = fabs(rotPhi - Phi); if (disPhi > Pi) disPhi = TwoPi - disPhi;
       if (disPhi < dPhi) badVertexGenerated = false;
       Nver+=1.;
@@ -296,8 +296,9 @@ bool CosmicMuonGenerator::nextMultiEvent() {
   
     if (NmuPmin < 2) continue; //EvtRejected while loop: get next event from file
 
-    std::cout << "start trial do loop: MuMuDist=" << MinDist/1000. << "[m]   Nmuons=" << nmuons 
-	      << "  NcloseMultiMuonEvents=" << NcloseMultiMuonEvents 
+    //if (Debug) 
+    std::cout << "start trial do loop: MuMuDist=" << MinDist/1000. << "[m]   Nmuons=" 
+	      << nmuons << "  NcloseMultiMuonEvents=" << NcloseMultiMuonEvents 
 	      << "  NskippedMultiMuonEvents=" << NskippedMultiMuonEvents << std::endl;  
 
     
@@ -331,8 +332,12 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 
     //cout << "SimTree->shower_Energy=" << SimTree->shower_Energy << endl;
 
+    /*
     if (newEvt) cout << "Theta_at=" << Theta_at << " phi_at=" << phi_at << " Px_at=" << Px_at
-		     << " Pz_at=" << Pz_at << " Py_at=" << Py_at << endl;
+		     << " Pz_at=" << Pz_at << " Py_at=" << Py_at 
+		     << " Vx_at=" << Vx_at << " Vy_at=" << Vy_at << " Vz_at=" << Vz_at 
+		     << endl;
+    */
 
     Theta_mu.resize(nmuons);
     for (int imu=0; imu<nmuons; ++imu) {
@@ -360,22 +365,23 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 
     }
 
-    if (newEvt) cout << "theta_mu_min=" << theta_mu_min << " theta_mu_max=" << theta_mu_max << endl;
-    if (newEvt) cout << "phi_at=" << phi_at << " phi_rel_min=" << phi_rel_min << " phi_rel_max=" << phi_rel_max << endl;
-    newEvt = false;
+    //if (newEvt) cout << "theta_mu_min=" << theta_mu_min << " theta_mu_max=" << theta_mu_max << endl;
+    //if (newEvt) cout << "phi_at=" << phi_at << " phi_rel_min=" << phi_rel_min << " phi_rel_max=" << phi_rel_max << endl;
+    //newEvt = false;
     
     
-    double h = SurfaceOfEarth + PlugWidth; //[mm]
-    double R_at = h*tan(Theta_at);
+    double h_sf = SurfaceOfEarth + PlugWidth; //[mm]
+
+    double R_at = h_sf*tan(Theta_at);
     
     double JdRxzV_dR_trans = 1.; 
     double JdPhiV_dPhi_trans = 1.; 
     double JdR_trans_sqrt = 1.;
     
     //chose random vertex Phi and Rxz weighted to speed up and smoothen
-    double R_mu_max = (h+Target3dRadius)*tan(theta_mu_max);
+    double R_mu_max = (h_sf+Target3dRadius)*tan(theta_mu_max);
     double R_max = min(SurfaceRadius, R_mu_max);
-    double R_mu_min = (h-Target3dRadius)*tan(theta_mu_min);
+    double R_mu_min = (h_sf-Target3dRadius)*tan(theta_mu_min);
     double R_min = max(0., R_mu_min);
     
     if (R_at>SurfaceRadius) {
@@ -417,12 +423,16 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 
     double pPh1=0.25, pPh2=0.7, pPh3=0.05;
 
-  
+    int temp = 0;
+    bool btemp = false;
   
     double trials = 0;
     Vx_mu.resize(nmuons); Vy_mu.resize(nmuons); Vz_mu.resize(nmuons);
-    do { //while (Id_sf.size() < 2 && trials < max_trials)
+    //do { //while (Id_sf.size() < 2 && trials < max_trials)
+    int NmuHitTarget = 0;
+    while (NmuHitTarget < 2) { 
 
+      NmuHitTarget = 0; //re-initialize every loop iteration
       double Nver = 0.;
 
       
@@ -481,8 +491,6 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       if (PhiV < -Pi) PhiV+=TwoPi;
       else if (PhiV > Pi) PhiV-=TwoPi;
       
-
-
       
       Nver++;
       trials += JdR_trans_sqrt * JdRxzV_dR_trans * JdPhiV_dPhi_trans;
@@ -491,7 +499,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
          
    
       Vx_at = RxzV*sin(PhiV); // [mm]
-      Vy_at = h; // [mm] (SurfaceOfEarth + PlugWidth + atmosphere height eventually)
+      Vy_at = h_sf + 10.e3; // [mm] (SurfaceOfEarth + PlugWidth + atmosphere height eventually)
       Vz_at = RxzV*cos(PhiV); // [mm]
       
       int NmuHitTargetSphere = 0;
@@ -499,7 +507,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	
 	Vx_mu[imu] = Vx_at + (-SimTree->particle__x[imu]*sin(NorthCMSzDeltaPhi)
 			      +SimTree->particle__y[imu]*cos(NorthCMSzDeltaPhi) )*10; //[mm] (Corsika cm to CMSCGEN mm)
-	Vy_mu[imu] = h; //[mm] fixed at surface + PlugWidth
+	Vy_mu[imu] = h_sf; //[mm] fixed at surface + PlugWidth
 	Vz_mu[imu] = Vz_at + ( SimTree->particle__x[imu]*cos(NorthCMSzDeltaPhi)
 			       +SimTree->particle__y[imu]*sin(NorthCMSzDeltaPhi) )*10; //[mm] (Corsika cm to CMSCGEN mm)
 
@@ -508,24 +516,42 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	if (SimTree->particle__ParticleID[imu] != 5 &&
 	    SimTree->particle__ParticleID[imu] != 6) continue;
 
+	if (P_mu[imu] < MinP_CMS) continue; 
+
 	//check here if at least 2 muons make it to the target sphere
 	double Vxz_mu = sqrt(Vx_mu[imu]*Vx_mu[imu] + Vz_mu[imu]*Vz_mu[imu]);
-	theta_mu_max = atan((Vxz_mu+Target3dRadius)/(h-Target3dRadius));
-	theta_mu_min = atan((Vxz_mu-Target3dRadius)/(h+Target3dRadius));
+	theta_mu_max = atan((Vxz_mu+Target3dRadius)/(h_sf-Target3dRadius));
+	theta_mu_min = atan((Vxz_mu-Target3dRadius)/(h_sf+Target3dRadius));
 	if (Theta_mu[imu] > theta_mu_min && Theta_mu[imu] < theta_mu_max) {
 	  
 	  // check phi range (for a sphere with Target3dRadius around the target)
 	  double dPhi = Pi; if (Vxz_mu > Target3dRadius) dPhi = asin(Target3dRadius/Vxz_mu);
-	  double rotPhi = PhiV + Pi; if (rotPhi > TwoPi) rotPhi -= TwoPi;
-	  double Phi = atan2(Px_mu[imu],Pz_mu[imu]); //muon phi
-	  double disPhi = fabs(rotPhi - Phi); if (disPhi > Pi) disPhi = TwoPi - disPhi;
-	  if (disPhi < dPhi) 
-	    if (P_mu[imu] > MinP_CMS) NmuHitTargetSphere++;
-	  
+	  double PhiPmu = atan2(Px_mu[imu],Pz_mu[imu]); //muon phi
+	  double PhiVmu = atan2(Vx_mu[imu],Vz_mu[imu]); //muon phi
+	  double rotPhi = PhiVmu + Pi; if (rotPhi > Pi) rotPhi -= TwoPi;
+	  double disPhi = fabs(rotPhi - PhiPmu); if (disPhi > Pi) disPhi = TwoPi - disPhi;
+	  if (disPhi < dPhi) {
+	    NmuHitTargetSphere++;
+	  }
+
+	  /*
+	    else if (btemp == false) {
+	      temp++;
+	      cout << "PhiPmu[" << imu << "]=" << PhiPmu 
+		   << " PxMu=" << Px_mu[imu] << " PzMu=" << Pz_mu[imu]
+		   << " PhiVmu=" << PhiVmu
+		   << " VxMu=" << Vx_mu[imu] << " VzMu=" << Vz_mu[imu]
+		   << " rotPhiVxz=" << rotPhi 
+		   << " dPhi=" << dPhi << " disPhi=" << disPhi << endl;  
+	    }
+	  */
 	}
 
       } //end imu for loop
       
+      if (temp > 0) btemp = true;
+
+
       if (NmuHitTargetSphere < 2) continue; //while (Id_sf.size() < 2) loop
     
       
@@ -595,12 +621,13 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	else if (Id_sf_this == 16) Id_sf_this = 310; //Ks0
 	else if (Id_sf_this == 17) Id_sf_this = 221; //eta
 	else if (Id_sf_this == 18) Id_sf_this = 3122; //Lambda
-
+	
 	else {
 	  cout << "CosmicMuonGenerator.cc: Warning! Muon Id=" << Id_sf_this 
 	       << " from file read in" << endl;
 	  Id_sf_this = 99999; //trouble
 	}
+	
 	Px_sf_this = Px_mu[imu];
 	Py_sf_this = Py_mu[imu]; //Corsika down going particles defined in -z direction!
 	Pz_sf_this = Pz_mu[imu];
@@ -660,7 +687,8 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	  Vy_ug.push_back(OneMuoEvt.vy());
 	  Vz_ug.push_back(OneMuoEvt.vz());
 	  T0_ug.push_back(OneMuoEvt.t0());
-	  
+
+	  NmuHitTarget++;
 	}
       }
       
@@ -669,7 +697,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       //std::cout << "P_at=" << P_at << " theta=" << theta_at << " phi=" << phi_at << endl;
       //std::cout << "Nmu's p=" << tmp_p << " theta=" << tmp_theta << " phi=" << tmp_phi << endl;
       
-    } while (Id_sf.size() < 2); //end of do loop
+    } // while (Id_sf.size() < 2); //end of do loop
     
 
     if (trials > max_trials) {
@@ -680,9 +708,9 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       continue; //EvtRejected while loop: get next event from file
     }
     else {
-      if (Id_sf.size() < 2) {
+      if (NmuHitTarget < 2) {
 	std::cout << "CosmicMuonGenerator.cc: Warning! less than two muons hit target: N(mu=)" 
-		  << Id_sf.size() << std::endl;
+		  << NmuHitTarget << std::endl;
 	std::cout << "trying next event (" << SimTree_jentry << ") from file" << std::endl;
 	NskippedMultiMuonEvents++;
 	continue; //EvtRejected while loop: get next event from file
@@ -696,8 +724,8 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 		  << " EventWeight=" << EventWeight << " Nmuons=" << Id_sf.size() << std::endl;
       }
     }
-
-
+    
+    
   } //while loop EvtRejected
   
 
