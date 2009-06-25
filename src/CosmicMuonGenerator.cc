@@ -273,7 +273,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 			     (SimTree->particle__y[imu]-SimTree->particle__y[jmu])
 			     ); //[cm] -> [mm]
 	if (MuMuDist < MinDist) MinDist = MuMuDist;
-	if (MuMuDist < maxMultiMuDist) MuInMaxDist = true;
+	if (MuMuDist < 2.*Target3dRadius) MuInMaxDist = true;
       }
     }
     if (MuInMaxDist) {
@@ -281,7 +281,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
     }
     else {
       std::cout << "CosmicMuonGenerator.cc: Warning! No muon pair closer than " 
-		<< maxMultiMuDist/1000. << "m   MinDist=" << MinDist/1000. << "m at surface" << std::endl;
+		<< Target3dRadius/1000. << "m   MinDist=" << MinDist/1000. << "m at surface" << std::endl;
       std::cout << "Fraction of too wide opening angle multi muon events: "
 		<< 1 - double(NcloseMultiMuonEvents)/SimTree_jentry << std::endl;
       std::cout << "NcloseMultiMuonEvents=" << NcloseMultiMuonEvents << std::endl;
@@ -490,6 +490,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       Vy_at = h; // [mm] (SurfaceOfEarth + PlugWidth + atmosphere height eventually)
       Vz_at = RxzV*cos(PhiV); // [mm]
       
+      int NmuHitTargetSphere = 0;
       for (int imu=0; imu<nmuons; ++imu) {
 	
 	Vx_mu[imu] = Vx_at + (-SimTree->particle__x[imu]*sin(NorthCMSzDeltaPhi)
@@ -497,9 +498,26 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	Vy_mu[imu] = h; //[mm] fixed at surface + PlugWidth
 	Vz_mu[imu] = Vz_at + ( SimTree->particle__x[imu]*cos(NorthCMSzDeltaPhi)
 			       +SimTree->particle__y[imu]*sin(NorthCMSzDeltaPhi) )*10; //[mm] (Corsika cm to CMSCGEN mm)
-	
+
+	//check here if at least 2 muons make it to the target sphere
+	double Vxz_mu = sqrt(Vx_mu[imu]*Vx_mu[imu] + Vz_mu[imu]*Vz_mu[imu]);
+	theta_mu_max = atan((Vxz_mu+Target3dRadius)/(h-Target3dRadius));
+	theta_mu_min = atan((Vxz_mu-Target3dRadius)/(h+Target3dRadius));
+	if (Theta_mu[imu] > theta_mu_min && Theta_mu[imu] < theta_mu_max) {
+	  
+	  // check phi range (for a sphere with Target3dRadius around the target)
+	  double dPhi = Pi; if (Vxz_mu > Target3dRadius) dPhi = asin(Target3dRadius/Vxz_mu);
+	  double rotPhi = PhiV + Pi; if (rotPhi > TwoPi) rotPhi -= TwoPi;
+	  double Phi = atan2(Px_mu[imu],Pz_mu[imu]); //muon phi
+	  double disPhi = fabs(rotPhi - Phi); if (disPhi > Pi) disPhi = TwoPi - disPhi;
+	  if (disPhi < dPhi) NmuHitTargetSphere++;
+	  
+	}
+
       } //end imu for loop
       
+      if (NmuHitTargetSphere < 2) continue; //while (Id_sf.size() < 2) loop
+
       
       T0_at = (RanGen.Rndm()*(MaxT0-MinT0) + MinT0)*SpeedOfLight; // [mm/c];
       

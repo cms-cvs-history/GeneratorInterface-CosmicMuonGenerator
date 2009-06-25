@@ -33,10 +33,10 @@ process.CosMuoGenSource.MaxTheta = 89.
 #process.CosMuoGenSource.ZCentrOfTarget = 15000.; 
 
 #Read in Multi muon events or generate single muon events (MultiMuon=false = default)
-##process.CosMuoGenSource.MultiMuon = True;
+process.CosMuoGenSource.MultiMuon = True;
 #process.CosMuoGenSource.MultiMuonFileName = "MultiEventsIn.root";
 #process.CosMuoGenSource.MultiMuonFileName = "test_25gev.root";
 #process.CosMuoGenSource.MultiMuonFileName = "test_150gev.root";
-##process.CosMuoGenSource.MultiMuonFileName = "test_800gev.root";
+process.CosMuoGenSource.MultiMuonFileName = "test_800gev.root";
 #process.CosMuoGenSource.MultiMuonFileName = "test_3000gev.root";
-##process.CosMuoGenSource.MultiMuonFileFirstEvent = 1;
+process.CosMuoGenSource.MultiMuonFileFirstEvent = 1;
