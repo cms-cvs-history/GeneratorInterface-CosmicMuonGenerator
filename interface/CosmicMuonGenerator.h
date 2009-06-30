@@ -90,6 +90,7 @@ public:
   // event with one particle
   SingleParticleEvent OneMuoEvt;
   double EventWeight; //for multi muon events
+  double Trials; //for multi muon events
   TFile* MultiIn; //file to be read in
   TTree* MultiTree; //tree of file with multi muon events
   sim* SimTree; //class to acces tree branches

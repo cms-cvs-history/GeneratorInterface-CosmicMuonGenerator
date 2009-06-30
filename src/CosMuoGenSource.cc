@@ -164,6 +164,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
   fEvt->set_signal_process_id(13);
 
   fEvt->weights().push_back( CosMuoGen->EventWeight ); // just one event weight 
+  fEvt->weights().push_back( CosMuoGen->Trials ); // int Trials number (unweighted) 
 
 
   if (cmVerbosity_) fEvt->print();

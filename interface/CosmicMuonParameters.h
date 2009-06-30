@@ -61,7 +61,7 @@ enum {Unknown=0, Plug, Wall, Air, Clay, Rock};
 
 //Multi Muon relevant parameters
 const double NorthCMSzDeltaPhi = 3./8.*Pi; //rad (Pi/2 if CMS -x = North)
-const int max_trials = 200000;
+const int max_Trials = 200000;
 
 
 #endif
