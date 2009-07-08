@@ -117,10 +117,10 @@ bool edm::CosMuoGenSource::produce(Event &e)
 
   fEvt = new HepMC::GenEvent();
 
-  HepMC::GenVertex* Vtx_at = new  HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_at/10., //[mm->cm]
-  							     CosMuoGen->Vy_at/10., //[mm->cm]
-  							     CosMuoGen->Vz_at/10., //[mm->cm]
-  							     CosMuoGen->T0_at/10.)); //[mm->cm]
+  HepMC::GenVertex* Vtx_at = new  HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_at/1.0, //[mm->cm]
+  							     CosMuoGen->Vy_at/1.0, //[mm->cm]
+  							     CosMuoGen->Vz_at/1.0, //[mm->cm]
+  							     CosMuoGen->T0_at/1.0)); //[mm->cm]
   HepMC::FourVector p_at(CosMuoGen->Px_at,CosMuoGen->Py_at,CosMuoGen->Pz_at,CosMuoGen->E_at);
   HepMC::GenParticle* Part_at =
     new HepMC::GenParticle(p_at,CosMuoGen->Id_at, 3);//Comment mother particle in
@@ -135,7 +135,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
       new HepMC::GenParticle(p_sf,CosMuoGen->Id_sf[i], 3); //Comment daughter particle
     Vtx_at->add_particle_out(Part_sf_in);
     
-    HepMC::GenVertex* Vtx_sf = new HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_sf[i]/10.,                             CosMuoGen->Vy_sf[i]/10., CosMuoGen->Vz_sf[i]/10., CosMuoGen->T0_sf[i]/10.));
+    HepMC::GenVertex* Vtx_sf = new HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_sf[i]/1.0,                             CosMuoGen->Vy_sf[i]/1.0, CosMuoGen->Vz_sf[i]/1.0, CosMuoGen->T0_sf[i]/1.0));
     HepMC::GenParticle* Part_sf_out =
       new HepMC::GenParticle(p_sf,CosMuoGen->Id_sf[i], 3); //Comment daughter particle
     
@@ -144,7 +144,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
     
     fEvt->add_vertex(Vtx_sf); //one per muon
 
-    HepMC::GenVertex* Vtx_ug = new HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_ug[i]/10.,                             CosMuoGen->Vy_ug[i]/10., CosMuoGen->Vz_ug[i]/10., CosMuoGen->T0_ug[i]/10.));
+    HepMC::GenVertex* Vtx_ug = new HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_ug[i]/1.0,                             CosMuoGen->Vy_ug[i]/1.0, CosMuoGen->Vz_ug[i]/1.0, CosMuoGen->T0_ug[i]/1.0));
     
     HepMC::FourVector p_ug(CosMuoGen->Px_ug[i],CosMuoGen->Py_ug[i],CosMuoGen->Pz_ug[i],CosMuoGen->E_ug[i]);
     HepMC::GenParticle* Part_ug =

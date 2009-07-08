@@ -44,7 +44,10 @@ void CosmicMuonGenerator::initialize(){
 #endif
     if (EventDisplay) initEvDis();
     std::cout << std::endl;
-    std::cout << "  generating " << NumberOfEvents << " events with random seed " << RanSeed << std::endl;
+    if (MultiMuon)
+      std::cout << "  read from file and select " << NumberOfEvents << " successfully processed events" << std::endl; 
+    else
+      std::cout << "  generating " << NumberOfEvents << " events with random seed " << RanSeed << std::endl;
 
     if (MultiMuon) {
       MultiIn = 0;
@@ -214,8 +217,6 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 
   while (EvtRejected) {
 
-    bool newEvt = true;
-
     //read in event from SimTree
     //ULong64_t ientry = SimTree->LoadTree(SimTree_jentry);
     Long64_t ientry = SimTree->GetEntry(SimTree_jentry);
@@ -334,13 +335,6 @@ bool CosmicMuonGenerator::nextMultiEvent() {
     double phi_rel_max = 0.; //phi_mu_max - phi_at
 
     //cout << "SimTree->shower_Energy=" << SimTree->shower_Energy << endl;
-
-    /*
-    if (newEvt) cout << "Theta_at=" << Theta_at << " phi_at=" << phi_at << " Px_at=" << Px_at
-		     << " Pz_at=" << Pz_at << " Py_at=" << Py_at 
-		     << " Vx_at=" << Vx_at << " Vy_at=" << Vy_at << " Vz_at=" << Vz_at 
-		     << endl;
-    */
 
     Theta_mu.resize(nmuons);
     for (int imu=0; imu<nmuons; ++imu) {
@@ -654,7 +648,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	
 	//T0_sf_this = (T0_sf_rdnm*(T0_sf_max-T0_sf_min) + T0_sf_min)*SpeedOfLight; // [mm/c]; 
 	//T0_sf_this = T0_at + SimTree->particle__Time[imu]*SpeedOfLight; // Corsika [ns] (*mm/ns) to [mm]
-	double T0_this = SimTree->particle__Time[imu];
+	//double T0_this = SimTree->particle__Time[imu];
 	T0_sf_this = (SimTree->particle__Time[imu] + T0_offset)*SpeedOfLight; //in [mm]
 
 	//cout << "T0_CORSIKA_file=" << T0_this << " T0_offset=" << T0_offset 
@@ -666,8 +660,8 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	Pz_sf_this = Pz_mu[imu];
 	//double P_sf_this = P_mu[imu];
 	E_sf_this = sqrt(P_mu[imu]*P_mu[imu] + MuonMass*MuonMass);
-	double theta_sf_this = Theta_mu[imu];
-	double phi_sf_this = atan2(Px_sf_this,Pz_sf_this);
+	//double theta_sf_this = Theta_mu[imu];
+	//double phi_sf_this = atan2(Px_sf_this,Pz_sf_this);
 	Vx_sf_this = Vx_mu[imu];
 	Vy_sf_this = Vy_mu[imu]; //[mm] fixed at surface + PlugWidth
 	Vz_sf_this = Vz_mu[imu];
@@ -710,7 +704,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	  Vy_sf.push_back(Vy_sf_this);
 	  Vz_sf.push_back(Vz_sf_this);
 	  T0_sf.push_back(T0_sf_this);
-	  //T0_sf.push_back(0.); //for full simulation
+	  //T0_sf.push_back(0.); //for full simulation tests
 	  
 	  Id_ug.push_back(OneMuoEvt.id());
 	  Px_ug.push_back(OneMuoEvt.px());
