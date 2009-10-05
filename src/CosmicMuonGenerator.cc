@@ -22,9 +22,13 @@ void CosmicMuonGenerator::initialize(){
     double Z_DistTargetEff = ZDistOfTarget;  //get this from cfg-file
     //double Z_CentrTargetEff = ZCentrOfTarget;  //get this from cfg-file
     if(TrackerOnly==true){
-    RadiusTargetEff = RadiusTracker;
-    Z_DistTargetEff = Z_DistTracker;
+      //std::cout << "CosmicMuonGenerator::initialize(): TrackerOnly = true!" << std::endl;  
+      RadiusTargetEff = RadiusTracker;
+      Z_DistTargetEff = Z_DistTracker;
     }
+    //std::cout << "CosmicMuonGenerator::initialize(): RadiusTargetEff = " << RadiusTracker << std::endl;  
+    //std::cout << "CosmicMuonGenerator::initialize(): Z_DistTargetEff = " << Z_DistTracker << std::endl;  
+
     Target3dRadius = sqrt(RadiusTargetEff*RadiusTargetEff + Z_DistTargetEff*Z_DistTargetEff) + MinStepSize;
     if (Debug) std::cout << "  radius of sphere  around  target = " << Target3dRadius << " mm" << std::endl;
     SurfaceRadius = (SurfaceOfEarth+PlugWidth+RadiusTargetEff)*tan(MaxTheta) + Target3dRadius;  
@@ -40,7 +44,8 @@ void CosmicMuonGenerator::initialize(){
   TH1D* ene = new TH1D("ene","generated energy",210,0.,1050.);
   TH1D* the = new TH1D("the","generated theta",90,0.,90.);
   TH1D* phi = new TH1D("phi","generated phi",120,0.,360.);
-  TH3F* ver = new TH3F("ver","Z-X-Y coordinates",50,-25.,25.,20,-10.,10.,20,-10.,10.);
+  //TH3F* ver = new TH3F("ver","Z-X-Y coordinates",50,-25.,25.,20,-10.,10.,20,-10.,10.);
+  TH3F* ver = new TH3F("ver","Z-X-Y coordinates",100,-25.,25.,40,-10.,10.,40,-10.,10.);
 #endif
     if (EventDisplay) initEvDis();
     std::cout << std::endl;
@@ -104,7 +109,7 @@ void CosmicMuonGenerator::nextEvent(){
       PhiV = RanGen.Rndm()*TwoPi;
       // check phi range (for a sphere with Target3dRadius around the target)
       double dPhi = Pi; if (RxzV > Target3dRadius) dPhi = asin(Target3dRadius/RxzV);
-      double rotPhi = PhiV + Pi; if (rotPhi > Pi) rotPhi -= TwoPi;
+      double rotPhi = PhiV + Pi; if (rotPhi > TwoPi) rotPhi -= TwoPi;
       double disPhi = fabs(rotPhi - Phi); if (disPhi > Pi) disPhi = TwoPi - disPhi;
       if (disPhi < dPhi) badVertexGenerated = false;
       Nver+=1.;
@@ -195,9 +200,9 @@ void CosmicMuonGenerator::nextEvent(){
   if (Debug){
     std::cout << "new event" << std::endl;
     std::cout << "  Px,Py,Pz,E,m = " << OneMuoEvt.px() << ", " << OneMuoEvt.py() << ", "
-         << OneMuoEvt.pz() << ", " << OneMuoEvt.e() << ", " << OneMuoEvt.m() << " GeV" << std::endl;
+	      << OneMuoEvt.pz() << ", " << OneMuoEvt.e() << ", " << OneMuoEvt.m() << " GeV" << std::endl;
     std::cout << "  Vx,Vy,Vz,t0  = " << OneMuoEvt.vx() << ", " << OneMuoEvt.vy() << ", " 
-         << OneMuoEvt.vz() << ", " << OneMuoEvt.t0() << " mm" << std::endl;
+	      << OneMuoEvt.vz() << ", " << OneMuoEvt.t0() << " mm" << std::endl;
   }
   if (EventDisplay) displayEv();
   
@@ -235,9 +240,9 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 
 
     int nmuons = SimTree->shower_nParticlesWritten;
-    if (nmuons < 2) {
-      std::cout << "CosmicMuonGenerator.cc: Warning!  Less than two muons in event: Nmuons=" 
-		<< nmuons << std::endl;
+    if (nmuons<MultiMuonNmin) {
+      std::cout << "CosmicMuonGenerator.cc: Warning!  Less than " << MultiMuonNmin << 
+	" muons in event!" << std::endl;
       std::cout << "trying next event from file" << std::endl;
       NskippedMultiMuonEvents++;
       //break; //EvtRejected while loop
@@ -272,30 +277,32 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	if (P_mu[jmu] < MinP_CMS) continue;
 	if (SimTree->particle__ParticleID[imu] != 5 &&
 	    SimTree->particle__ParticleID[imu] != 6) continue;
-	MuMuDist = 0.1*sqrt( (SimTree->particle__x[imu]-SimTree->particle__x[jmu])*
-			     (SimTree->particle__x[imu]-SimTree->particle__x[jmu]) 
-			     +(SimTree->particle__y[imu]-SimTree->particle__y[jmu])*
-			     (SimTree->particle__y[imu]-SimTree->particle__y[jmu])
-			     ); //[cm] -> [mm]
+	MuMuDist = sqrt( (SimTree->particle__x[imu]-SimTree->particle__x[jmu])*
+			 (SimTree->particle__x[imu]-SimTree->particle__x[jmu]) 
+			 +(SimTree->particle__y[imu]-SimTree->particle__y[jmu])*
+			 (SimTree->particle__y[imu]-SimTree->particle__y[jmu])
+			 )*10.; //CORSIKA [cm] to CMSCGEN [mm]
 	if (MuMuDist < MinDist) MinDist = MuMuDist;
 	if (MuMuDist < 2.*Target3dRadius) MuInMaxDist = true;
       }
     }
-    if (MuInMaxDist) {
-      NcloseMultiMuonEvents++;
-    }
-    else {
-      std::cout << "CosmicMuonGenerator.cc: Warning! No muon pair closer than " 
-		<< Target3dRadius/1000. << "m   MinDist=" << MinDist/1000. << "m at surface" << std::endl;
-      std::cout << "Fraction of too wide opening angle multi muon events: "
-		<< 1 - double(NcloseMultiMuonEvents)/SimTree_jentry << std::endl;
-      std::cout << "NcloseMultiMuonEvents=" << NcloseMultiMuonEvents << std::endl;
-      std::cout << "trying next event from file" << std::endl;
-      NskippedMultiMuonEvents++;
-      continue; //EvtRejected while loop: get next event from file
+    if (MultiMuonNmin>=2) {
+      if (MuInMaxDist) { 
+	NcloseMultiMuonEvents++;
+      }
+      else {
+	std::cout << "CosmicMuonGenerator.cc: Warning! No muon pair closer than " 
+		  << 2.*Target3dRadius/1000. << "m   MinDist=" << MinDist/1000. << "m at surface" << std::endl;
+	std::cout << "Fraction of too wide opening angle multi muon events: "
+		  << 1 - double(NcloseMultiMuonEvents)/SimTree_jentry << std::endl;
+	std::cout << "NcloseMultiMuonEvents=" << NcloseMultiMuonEvents << std::endl;
+	std::cout << "trying next event from file" << std::endl;
+	NskippedMultiMuonEvents++;
+	continue; //EvtRejected while loop: get next event from file
+      }
     }
   
-    if (NmuPmin < 2) {
+    if (NmuPmin < MultiMuonNmin) { //take single muon events consistently into account
       NskippedMultiMuonEvents++;
       continue; //EvtRejected while loop: get next event from file
     }
@@ -356,8 +363,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       //if (newEvt) cout << "Theta_mu[" << imu << "]=" << Theta_mu[imu] 
       //	       << " phi=" << atan2(Px_mu[imu],Pz_mu[imu]) 
       //	       << " Px=" << Px_mu[imu] << " Pz=" << Pz_mu[imu] 
-      //	       << " Py=" << Py_mu[imu] << endl
-;
+      //	       << " Py=" << Py_mu[imu] << endl;
       //cout << "SimTree->particle__Pz[" << imu << "]=" << SimTree->particle__Pz[imu] << endl;
 
     }
@@ -428,7 +434,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
     Vx_mu.resize(nmuons); Vy_mu.resize(nmuons); Vz_mu.resize(nmuons);
     //do { //while (Id_sf.size() < 2 && trials < max_trials)
     int NmuHitTarget = 0;
-    while (NmuHitTarget < 2) { 
+    while (NmuHitTarget < MultiMuonNmin) { 
    
       NmuHitTarget = 0; //re-initialize every loop iteration
       double Nver = 0.;
@@ -498,7 +504,11 @@ bool CosmicMuonGenerator::nextMultiEvent() {
          
    
       Vx_at = RxzV*sin(PhiV); // [mm]
-      Vy_at = h_sf + 10.e3; // [mm] (SurfaceOfEarth + PlugWidth + atmosphere height eventually)
+
+      //Vy_at = h_sf + 10.e3; // [mm] (SurfaceOfEarth + PlugWidth + atmosphere height eventually)
+      Vy_at = h_sf; // [mm] (SurfaceOfEarth + PlugWidth; Determine primary particle height below)
+      //Vy_at = SimTree->shower_StartingAltitude*10. + h_sf; // [mm]
+      //cout << "SimTree->shower_StartingAltitude*10=" << SimTree->shower_StartingAltitude*10 << endl;
       Vz_at = RxzV*cos(PhiV); // [mm]
       
       int NmuHitTargetSphere = 0;
@@ -510,6 +520,16 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	Vz_mu[imu] = Vz_at + ( SimTree->particle__x[imu]*cos(NorthCMSzDeltaPhi)
 			       +SimTree->particle__y[imu]*sin(NorthCMSzDeltaPhi) )*10; //[mm] (Corsika cm to CMSCGEN mm)
 
+	
+	//add atmospheric height to primary particle (default SimTree->shower_StartingAltitude = 0.)
+	double pt_sec = sqrt(Px_mu[imu]*Px_mu[imu]+Pz_mu[imu]*Pz_mu[imu]);
+	double theta_sec = atan2(fabs(Py_mu[imu]),pt_sec);
+	double r_sec = sqrt((Vx_mu[imu]-Vx_at)*(Vx_mu[imu]-Vx_at)
+			    +(Vz_mu[imu]-Vz_at)*(Vz_mu[imu]-Vz_at));
+	double h_prod =  r_sec * tan(theta_sec);
+	if (h_prod + h_sf > Vy_at) Vy_at = h_prod + h_sf;
+	//cout << "h_prod+h_sf=" << h_prod + h_sf << "   Vy_at= " << Vy_at << endl;
+	
 
 	//only muons
 	if (SimTree->particle__ParticleID[imu] != 5 &&
@@ -547,11 +567,12 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	}
 
       } //end imu for loop
+
       
       if (temp > 0) btemp = true;
 
 
-      if (NmuHitTargetSphere < 2) continue; //while (Id_sf.size() < 2) loop
+      if (NmuHitTargetSphere < MultiMuonNmin) continue; //while (Id_sf.size() < 2) loop
     
       
       //T0_at = (RanGen.Rndm()*(MaxT0-MinT0) + MinT0)*SpeedOfLight; // [mm/c];
@@ -593,25 +614,30 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       double Vx_sf_this=0., Vy_sf_this=0., Vz_sf_this=0.;
       double T0_sf_this=0.;
       
-
+      /*
+      //adjust timing at surface, before propagation
       double T0_sf_min, T0_sf_max;
       T0_sf_min = T0_sf_max = SimTree->particle__Time[0];
       for (int imu=0; imu<nmuons; ++imu) {
+	if (P_mu[imu] < MinP_CMS) continue;
 	double T0_this = SimTree->particle__Time[imu];
 	if (T0_this < T0_sf_min) T0_sf_min = T0_this;
 	if (T0_this > T0_sf_max) T0_sf_max = T0_this;
 	//cout << "imu=" << imu << " T0_this=" << T0_this 
-	//   << " T0_sf_min=" << T0_sf_min << " T0_sf_max=" << T0_sf_max << endl; 
+	//   << " P=" << P_mu[imu] << endl;
       }
-      
-      double T0_min = T0_sf_min +MinT0;
-      double T0_max = T0_sf_max +MaxT0;
-      double T0_offset = (RanGen.Rndm()*(T0_max -T0_min)+MinT0-T0_sf_max);
-      T0_at = T0_offset - (Vy_at-h_sf); //[mm]
+    
+      double T0_min = T0_sf_min +MinT0; //-12.5ns
+      double T0_max = T0_sf_max +MaxT0; //+12.5ns
+      double T0_offset = (RanGen.Rndm()*(T0_max -T0_min)+MinT0-T0_sf_max); // [ns]
+      T0_at = T0_offset*SpeedOfLight - (Vy_at-h_sf); //[mm]
+      */
+      T0_at = SimTree->shower_GH_t0 * SpeedOfLight; // [mm]
 
       //cout << "MinT0=" << MinT0 << " MaxT0=" << MaxT0 
       //   << " T0_sf_min=" << T0_sf_min << " T0_sf_max=" << T0_sf_max
-      //   << " T0_min=" << T0_min << " T0_max=" << T0_max << endl;
+      //   << " T0_sf_max-T0_sf_min=" << T0_sf_max - T0_sf_min << endl;
+      //cout << "Vy_at=" << Vy_at << " Vy_at/c[ns]=" << Vy_at/SpeedOfLight << endl;
 
       for (int imu=0; imu<nmuons; ++imu) {
 
@@ -648,8 +674,9 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	
 	//T0_sf_this = (T0_sf_rdnm*(T0_sf_max-T0_sf_min) + T0_sf_min)*SpeedOfLight; // [mm/c]; 
 	//T0_sf_this = T0_at + SimTree->particle__Time[imu]*SpeedOfLight; // Corsika [ns] (*mm/ns) to [mm]
-	//double T0_this = SimTree->particle__Time[imu];
-	T0_sf_this = (SimTree->particle__Time[imu] + T0_offset)*SpeedOfLight; //in [mm]
+
+	//T0_sf_this = (SimTree->particle__Time[imu] + T0_offset)*SpeedOfLight; //in [mm]
+	T0_sf_this = SimTree->particle__Time[imu] * SpeedOfLight; //in [mm]
 
 	//cout << "T0_CORSIKA_file=" << T0_this << " T0_offset=" << T0_offset 
 	//   << " T0_sf_mu[" << imu << "]=" << T0_sf_this 
@@ -704,7 +731,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	  Vy_sf.push_back(Vy_sf_this);
 	  Vz_sf.push_back(Vz_sf_this);
 	  T0_sf.push_back(T0_sf_this);
-	  //T0_sf.push_back(0.); //for full simulation tests
+	  //T0_sf.push_back(0.); //synchronised arrival for 100% efficient full simulation tests
 	  
 	  Id_ug.push_back(OneMuoEvt.id());
 	  Px_ug.push_back(OneMuoEvt.px());
@@ -721,6 +748,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	}
       }
       
+
       //tmp_theta = acos(-tmp_py/tmp_p);
       //tmp_phi = atan2(tmp_px,tmp_pz);
       //std::cout << "P_at=" << P_at << " theta=" << theta_at << " phi=" << phi_at << endl;
@@ -738,17 +766,77 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       continue; //EvtRejected while loop: get next event from file
     }
     else {
-      if (NmuHitTarget < 2) {
-	std::cout << "CosmicMuonGenerator.cc: Warning! less than two muons hit target: N(mu=)" 
-		  << NmuHitTarget << std::endl;
+      if (NmuHitTarget < MultiMuonNmin) {
+	std::cout << "CosmicMuonGenerator.cc: Warning! less than " << MultiMuonNmin << 
+	  " muons hit target: N(mu=)" << NmuHitTarget << std::endl;
 	std::cout << "trying next event (" << SimTree_jentry << ") from file" << std::endl;
 	NskippedMultiMuonEvents++;
 	continue; //EvtRejected while loop: get next event from file
       }
       else { //if (MuInMaxDist) {
+
+	//re-adjust T0's of surviving muons shifted to trigger time box
+	//(possible T0 increase due to propagation (loss of energy/speed + travelled distance))
+	double T0_ug_min, T0_ug_max;
+	T0_ug_min = T0_ug_max = T0_ug[0];
+	double Tbox = (MaxT0 - MinT0) * SpeedOfLight; // [mm]
+	double minDeltaT0 = 2*Tbox;
+	for (unsigned int imu=0; imu<Id_ug.size(); ++imu) {
+	  double T0_this = T0_ug[imu];
+	  if (T0_this < T0_ug_min) T0_ug_min = T0_this;
+	  if (T0_this > T0_ug_max) T0_ug_max = T0_this;
+	  cout << "imu=" << imu << " T0_this=" << T0_this 
+	       << " P=" << sqrt(pow(Px_ug[imu],2) + pow(Py_ug[imu],2) + pow(Pz_ug[imu],2)) << endl;
+	  for (unsigned int jmu=0; jmu<imu; ++jmu) {
+	    if (fabs(T0_ug[imu]-T0_ug[jmu]) < minDeltaT0) minDeltaT0 = fabs(T0_ug[imu]-T0_ug[jmu]);
+	  }
+	}
+	
+	if (int(Id_ug.size()) >= MultiMuonNmin && minDeltaT0 > Tbox)
+	  continue; //EvtRejected while loop: get next event from file
+
+	cout << "T0_ug_min=" << T0_ug_min << " T0_ug_max=" << T0_ug_max 
+	     << " MinT0=" << MinT0 << " MaxT0=" << MaxT0 << endl; 
+	double T0_min = T0_ug_min +MinT0*SpeedOfLight; //-12.5ns * c [mm]
+	double T0_max = T0_ug_max +MaxT0*SpeedOfLight; //+12.5ns * c [mm]
+
+	//ckeck if >= NmuMin in time box, else throw new random number + augment evt weight
+	int TboxTrials = 0;
+	int NmuInTbox;
+	double T0_offset, T0diff;
+	for (int tboxtrial=0; tboxtrial<1000; ++tboxtrial) { //max 1000 trials
+	  T0_offset = RanGen.Rndm()*(T0_max -T0_min); // [mm]
+	  TboxTrials++;
+	  T0diff = T0_offset - T0_max; // [mm] 
+	  NmuInTbox = 0;
+	  for (unsigned int imu=0; imu<Id_ug.size(); ++imu) {
+	    if (T0_ug[imu]+T0diff > MinT0*SpeedOfLight && T0_ug[imu]+T0diff < MaxT0*SpeedOfLight)
+	      NmuInTbox++;
+	  }
+	  if (NmuInTbox >= MultiMuonNmin) break;
+
+	}
+	if (NmuInTbox < MultiMuonNmin) continue; //EvtRejected while loop: get next event from file
+
+
+	cout << "initial T0_at=" << T0_at << " T0_min=" << T0_min << " T0_max=" << T0_max 
+	     << " T0_offset=" << T0_offset;
+	T0_at += T0diff; //[mm]
+	cout << " T0diff=" << T0diff << endl;
+	for (unsigned int imu=0; imu<Id_ug.size(); ++imu) { //adjust @ surface + underground
+	  cout << "before: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu]; 
+	  T0_sf[imu] += T0diff;
+	  T0_ug[imu] += T0diff;
+	  cout << "   after: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu] << endl;
+	}	
+	cout << "T0diff=" << T0diff << " T0_at=" << T0_at << endl;
+
+
+
 	Nsel += 1;
 	//EventWeight = 1./Trials;
-	EventWeight = JdR_trans_sqrt * JdRxzV_dR_trans * JdPhiV_dPhi_trans / trials;
+	EventWeight = JdR_trans_sqrt * JdRxzV_dR_trans * JdPhiV_dPhi_trans 
+	  / (trials * TboxTrials);
 	EvtRejected = false;
 	std::cout << "CosmicMuonGenerator.cc: Theta_at=" << Theta_at << " phi_at=" << phi_at << " Px_at=" << Px_at << " Py_at=" << Py_at << " Pz_at=" << Pz_at << " Vx_at=" << Vx_at << " Vy_at=" << Vy_at << " Vz_at=" << Vz_at 
 		  << " EventWeight=" << EventWeight << " Nmuons=" << Id_sf.size() << std::endl;
@@ -895,7 +983,8 @@ bool CosmicMuonGenerator::goodOrientation(){
   if (phiaccepted && thetaaccepted) goodAngles = true;
   //if (phiaccepted) std::cout << "Bingo! phiaccepted=true!" << std::endl;
 
-  return goodAngles;
+  //return goodAngles;
+  return true;
 }
 
 void CosmicMuonGenerator::initEvDis(){
@@ -905,7 +994,7 @@ void CosmicMuonGenerator::initEvDis(){
   if(TrackerOnly==true){
     rCMS = RadiusTracker/1000.;
     zCMS = Z_DistTracker/1000.;
-}
+  }
   TH2F* disXY = new TH2F("disXY","X-Y view",160,-rCMS,rCMS,160,-rCMS,rCMS);
   TH2F* disZY = new TH2F("disZY","Z-Y view",150,-zCMS,zCMS,160,-rCMS,rCMS);
   gStyle->SetPalette(1,0);
@@ -1017,7 +1106,7 @@ void CosmicMuonGenerator::setMultiMuon(bool MultiMu){ if (NotInitialized) MultiM
 
 void CosmicMuonGenerator::setMultiMuonFileName(std::string MultiMuFile){ if (NotInitialized) MultiMuonFileName = MultiMuFile; }
 void CosmicMuonGenerator::setMultiMuonFileFirstEvent(int MultiMuFile1stEvt){ if (NotInitialized) MultiMuonFileFirstEvent = MultiMuFile1stEvt; }
-
+void CosmicMuonGenerator::setMultiMuonNmin(int MultiMuNmin){ if (NotInitialized) MultiMuonNmin = MultiMuNmin; }
 void CosmicMuonGenerator::setTIFOnly_constant(bool TIF){ if (NotInitialized) TIFOnly_constant = TIF; }
 
 void CosmicMuonGenerator::setTIFOnly_linear(bool TIF){ if (NotInitialized) TIFOnly_linear = TIF; }

@@ -45,6 +45,7 @@ namespace edm
     bool         MultiMuon; //read in multi-muon events from file instead of generating single muon events
     std::string  MultiMuonFileName; //file containing multi muon events, to be read in
     int32_t      MultiMuonFileFirstEvent;
+    int32_t      MultiMuonNmin;
     bool         TIFOnly_constant; //if set to "true" cosmics can also be generated below 2GeV with unphysical constant energy dependence
     bool         TIFOnly_linear; //if set to "true" cosmics can also be generated below 2GeV with unphysical linear energy dependence
     bool         MTCCHalf; //if set to "true" muons are sure to hit half of CMS important for MTCC, 

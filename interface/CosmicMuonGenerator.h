@@ -40,7 +40,7 @@ public:
     MaxP =   3000.;
     MinTheta =  0.*Deg2Rad;
     //MaxTheta = 84.26*Deg2Rad;
-    MaxTheta = 89.0*Deg2Rad;
+    MaxTheta = 84.26*Deg2Rad;
     MinPhi =    0.*Deg2Rad;
     MaxPhi =  360.*Deg2Rad;
     MinT0  = -12.5;
@@ -53,6 +53,7 @@ public:
     MultiMuon = false;
     MultiMuonFileName = "dummy.root";
     MultiMuonFileFirstEvent = 0;
+    MultiMuonNmin = 2;
     TIFOnly_constant = false;
     TIFOnly_linear = false;
     MTCCHalf = false;
@@ -156,6 +157,7 @@ private:
   bool   MultiMuon; //read in multi-muon events from file instead of generating single muon events
   std::string MultiMuonFileName; //file containing multi muon events, to be read in
   int MultiMuonFileFirstEvent; //first multi muon event, to be read in
+  int MultiMuonNmin; //minimal number of multi muons per event reaching the cylinder surrounding CMS
   bool   TIFOnly_constant; //if set to "true" cosmics can also be generated below 2GeV with unphysical constant energy dependence
   bool   TIFOnly_linear; //if set to "true" cosmics can also be generated below 2GeV with unphysical linear energy dependence
   bool   MTCCHalf; //if set to "true" muons are sure to hit half of CMS important for MTCC, 
@@ -205,6 +207,7 @@ public:
   void setMultiMuon(bool MultiMu);
   void setMultiMuonFileName(std::string MultiMuonFileName);
   void setMultiMuonFileFirstEvent(int MultiMuFile1stEvt);
+  void setMultiMuonNmin(int MultiMuNmin);
   void setTIFOnly_constant(bool TIF);
   void setTIFOnly_linear(bool TIF);
   void setMTCCHalf(bool MTCC);

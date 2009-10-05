@@ -12,11 +12,13 @@
     // define the generator
     CosmicMuonGenerator CosUgGen;
     // set up generator
-    CosUgGen.setNumberOfEvents(100);
+    CosUgGen.setNumberOfEvents(10);
     CosUgGen.setRanSeed(135799468);
     CosUgGen.setMinP(3.);              // could be set higher due to energy loss in earth above CMS  
     CosUgGen.setMaxP(3000.);  
-    CosUgGen.setMaxTheta(80.);         // "default" value for underground	
+    CosUgGen.setMaxTheta(84.26);         // "default" value for underground	
+    CosUgGen.setRadiusOfTarget(8000.);	
+    CosUgGen.setZDistOfTarget(15000.);
     // run the generator (in this order)
     CosUgGen.runCMG();
     // rate (cosmic muons per second)
@@ -87,16 +89,28 @@
   C2->cd(1);
   ver->SetMarkerColor(3333);
   ver->Draw();
-  ver->GetXaxis()->SetLabelSize(0.05);
-  ver->GetXaxis()->SetTitleSize(0.06);
+  ver->GetXaxis()->SetLabelSize(0.04);
+  ver->GetXaxis()->SetTitleSize(0.05);
+  ver->GetXaxis()->SetTitleOffset(1.3);
   ver->GetXaxis()->SetTitle("gen. Z [m]");
   ver->GetYaxis()->SetLabelSize(0.04);
   ver->GetYaxis()->SetTitleSize(0.05);
-  ver->GetYaxis()->SetTitleOffset(1.0);
+  ver->GetYaxis()->SetTitleOffset(1.3); 
   ver->GetYaxis()->SetTitle("gen. X [m]");
-  ver->GetZaxis()->SetLabelSize(0.05);
-  ver->GetZaxis()->SetTitleSize(0.06);
-  ver->GetZaxis()->SetTitleOffset(0.6);
+  ver->GetZaxis()->SetLabelSize(0.04);
+  ver->GetZaxis()->SetTitleSize(0.05); 
+  ver->GetZaxis()->SetTitleOffset(0.7);
   ver->GetZaxis()->SetTitle("gen. Y [m]");
+  C2->Print("cos_ug_cyl_vtx.eps");
+
+/*
+  TFile* cos_ug_hist = new TFile("cos_ug_hist.root","RECREATE");
+  ene-Write();
+  the->Write();
+  phi->Write();		
+  ver->Write();			
+  cos_ug_hist->Close();
+*/
+
 #endif
 }
