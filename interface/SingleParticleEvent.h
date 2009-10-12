@@ -78,6 +78,8 @@ public:
   double vy(); // [mm]
   double vz(); // [mm]
   double t0(); // [mm/c] with c = 299.792458 mm/ns
+  double WaterEquivalents(); //[g cm^-2]
+
   // event info (calculated)
   double phi();   // in horizontal (x-z) plane [rad]
   double theta(); // off vertical    (y) axis  [rad]
@@ -87,5 +89,6 @@ public:
 
   double PlugVx;
   double PlugVz;
+  double waterEquivalents;
 };
 #endif

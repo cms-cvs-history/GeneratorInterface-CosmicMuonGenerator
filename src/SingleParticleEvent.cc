@@ -162,8 +162,8 @@ void SingleParticleEvent::propagate(double ElossScaleFac, double RadiusTarget, d
       double lRock = double(nMat[Rock])*stepSize;      
       //double lUnknown = double(nMat[Unknown])*stepSize;
 
-      double waterEquivalents = (lAir*RhoAir + lWall*RhoWall + lRock*RhoRock
-				 + lClay*RhoClay + lPlug*RhoPlug) *ElossScaleFac/10.; // [g cm^-2]
+      waterEquivalents = (lAir*RhoAir + lWall*RhoWall + lRock*RhoRock
+				 + lClay*RhoClay + lPlug*RhoPlug) *ElossScaleFac/10.; // [mm/10]*[g cm^-3]
       subtractEloss(waterEquivalents);
       if (E < MuonMass) HitTarget = false; // muon stopped in the material around the target
     }
@@ -253,6 +253,8 @@ double SingleParticleEvent::vy(){ return Vy; }
 double SingleParticleEvent::vz(){ return Vz; }
 
 double SingleParticleEvent::t0(){ return T0; }
+
+double SingleParticleEvent::WaterEquivalents() { return waterEquivalents; }
 
 double SingleParticleEvent::phi(){
   double phiXZ = atan2(Px,Pz);
