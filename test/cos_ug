@@ -12,7 +12,7 @@
     // define the generator
     CosmicMuonGenerator CosUgGen;
     // set up generator
-    CosUgGen.setNumberOfEvents(10);
+    CosUgGen.setNumberOfEvents(2);
     CosUgGen.setRanSeed(135799468);
     CosUgGen.setMinP(3.);              // could be set higher due to energy loss in earth above CMS  
     CosUgGen.setMaxP(3000.);  
