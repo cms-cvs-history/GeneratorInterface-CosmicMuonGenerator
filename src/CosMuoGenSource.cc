@@ -23,6 +23,7 @@ edm::CosMuoGenSource::CosMuoGenSource( const ParameterSet & pset, InputSourceDes
   MultiMuon(pset.getParameter<bool>("MultiMuon")),
   MultiMuonFileName(pset.getParameter<std::string>("MultiMuonFileName")),
   MultiMuonFileFirstEvent(pset.getParameter<int>("MultiMuonFileFirstEvent")),
+  MultiMuonNmin(pset.getParameter<int>("MultiMuonNmin")),
   TIFOnly_constant(pset.getParameter<bool>("TIFOnly_constant")),
   TIFOnly_linear(pset.getParameter<bool>("TIFOnly_linear")),
   MTCCHalf(pset.getParameter<bool>("MTCCHalf")),
@@ -58,6 +59,7 @@ edm::CosMuoGenSource::CosMuoGenSource( const ParameterSet & pset, InputSourceDes
     CosMuoGen->setMultiMuon(MultiMuon);
     CosMuoGen->setMultiMuonFileName(MultiMuonFileName);
     CosMuoGen->setMultiMuonFileFirstEvent(MultiMuonFileFirstEvent);
+    CosMuoGen->setMultiMuonNmin(MultiMuonNmin);
     CosMuoGen->setTIFOnly_constant(TIFOnly_constant);
     CosMuoGen->setTIFOnly_linear(TIFOnly_linear);
     CosMuoGen->setMTCCHalf(MTCCHalf);
@@ -123,7 +125,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
 
 
   fEvt = new HepMC::GenEvent();
-
+  
   HepMC::GenVertex* Vtx_at = new  HepMC::GenVertex(HepMC::FourVector(CosMuoGen->Vx_at, //[mm]
   							     CosMuoGen->Vy_at, //[mm]
   							     CosMuoGen->Vz_at, //[mm]
@@ -176,7 +178,7 @@ bool edm::CosMuoGenSource::produce(Event &e)
 
 
   if (cmVerbosity_) fEvt->print();
-
+  
   std::auto_ptr<HepMCProduct> CMProduct(new HepMCProduct());
   CMProduct->addHepMCData( fEvt );
   e.put(CMProduct);

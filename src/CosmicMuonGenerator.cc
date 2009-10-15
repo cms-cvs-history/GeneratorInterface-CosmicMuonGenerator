@@ -307,11 +307,12 @@ bool CosmicMuonGenerator::nextMultiEvent() {
       continue; //EvtRejected while loop: get next event from file
     }
 
-    //if (Debug) 
-    std::cout << "start trial do loop: MuMuDist=" << MinDist/1000. << "[m]   Nmuons=" 
-	      << nmuons << "  NcloseMultiMuonEvents=" << NcloseMultiMuonEvents 
-	      << "  NskippedMultiMuonEvents=" << NskippedMultiMuonEvents << std::endl;  
-
+    if (Debug) 
+      if (MultiMuonNmin>=2)
+	std::cout << "start trial do loop: MuMuDist=" << MinDist/1000. << "[m]   Nmuons=" 
+		  << nmuons << "  NcloseMultiMuonEvents=" << NcloseMultiMuonEvents 
+		  << "  NskippedMultiMuonEvents=" << NskippedMultiMuonEvents << std::endl;  
+    
     
     //int primary_id = SimTree->run_ParticleID;
     Id_at = SimTree->shower_EventID;
@@ -760,6 +761,14 @@ bool CosmicMuonGenerator::nextMultiEvent() {
     if (trials > max_Trials) {
       std::cout << "CosmicMuonGenerator.cc: Warning! trials reach max_trials=" << max_Trials
 		<< " without accepting event!" << std::endl;
+      if (Debug) {
+	std::cout << " N(mu)=" << Id_ug.size();
+	if (Id_ug.size()>=1) 
+	  std::cout << " E[0]=" << E_ug[0] << " theta=" 
+		    << acos(-Py_ug[0]/sqrt(Px_ug[0]*Px_ug[0]+Py_ug[0]*Py_ug[0]+Pz_ug[0]*Pz_ug[0]))
+		    << " R_xz=" << sqrt(Vx_sf[0]*Vx_sf[0]+Vy_sf[0]*Vy_sf[0]);
+	std::cout << " Theta_at=" << Theta_at << std::endl; 
+      }
       std::cout << "Unweighted int num of Trials = " << Trials << std::endl;
       std::cout << "trying next event (" << SimTree_jentry << ") from file" << std::endl;
       NskippedMultiMuonEvents++;
@@ -785,18 +794,19 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	  double T0_this = T0_ug[imu];
 	  if (T0_this < T0_ug_min) T0_ug_min = T0_this;
 	  if (T0_this > T0_ug_max) T0_ug_max = T0_this;
-	  cout << "imu=" << imu << " T0_this=" << T0_this 
-	       << " P=" << sqrt(pow(Px_ug[imu],2) + pow(Py_ug[imu],2) + pow(Pz_ug[imu],2)) << endl;
+	  if (Debug) std::cout << "imu=" << imu << " T0_this=" << T0_this 
+			       << " P=" << sqrt(pow(Px_ug[imu],2) + pow(Py_ug[imu],2) + pow(Pz_ug[imu],2)) 
+			       << std::endl;
 	  for (unsigned int jmu=0; jmu<imu; ++jmu) {
 	    if (fabs(T0_ug[imu]-T0_ug[jmu]) < minDeltaT0) minDeltaT0 = fabs(T0_ug[imu]-T0_ug[jmu]);
 	  }
 	}
 	
-	if (int(Id_ug.size()) >= MultiMuonNmin && minDeltaT0 > Tbox)
+	if (int(Id_ug.size()) >= MultiMuonNmin && MultiMuonNmin>=2 && minDeltaT0 > Tbox)
 	  continue; //EvtRejected while loop: get next event from file
 
-	cout << "T0_ug_min=" << T0_ug_min << " T0_ug_max=" << T0_ug_max 
-	     << " MinT0=" << MinT0 << " MaxT0=" << MaxT0 << endl; 
+	//cout << "T0_ug_min=" << T0_ug_min << " T0_ug_max=" << T0_ug_max 
+	//   << " MinT0=" << MinT0 << " MaxT0=" << MaxT0 << endl; 
 	double T0_min = T0_ug_min +MinT0*SpeedOfLight; //-12.5ns * c [mm]
 	double T0_max = T0_ug_max +MaxT0*SpeedOfLight; //+12.5ns * c [mm]
 
@@ -819,17 +829,18 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	if (NmuInTbox < MultiMuonNmin) continue; //EvtRejected while loop: get next event from file
 
 
-	cout << "initial T0_at=" << T0_at << " T0_min=" << T0_min << " T0_max=" << T0_max 
-	     << " T0_offset=" << T0_offset;
+	if (Debug) cout << "initial T0_at=" << T0_at << " T0_min=" << T0_min << " T0_max=" << T0_max 
+			<< " T0_offset=" << T0_offset;
 	T0_at += T0diff; //[mm]
-	cout << " T0diff=" << T0diff << endl;
+	if (Debug) cout << " T0diff=" << T0diff << endl;
 	for (unsigned int imu=0; imu<Id_ug.size(); ++imu) { //adjust @ surface + underground
-	  cout << "before: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu]; 
+	  if (Debug) cout << "before: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu]; 
 	  T0_sf[imu] += T0diff;
 	  T0_ug[imu] += T0diff;
-	  cout << "   after: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu] << endl;
+	  //if (Debug) 
+	    cout << "   after: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu] << endl;
 	}	
-	cout << "T0diff=" << T0diff << " T0_at=" << T0_at << endl;
+	if (Debug) cout << "T0diff=" << T0diff << " T0_at=" << T0_at << endl;
 
 
 
@@ -838,8 +849,11 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	EventWeight = JdR_trans_sqrt * JdRxzV_dR_trans * JdPhiV_dPhi_trans 
 	  / (trials * TboxTrials);
 	EvtRejected = false;
-	std::cout << "CosmicMuonGenerator.cc: Theta_at=" << Theta_at << " phi_at=" << phi_at << " Px_at=" << Px_at << " Py_at=" << Py_at << " Pz_at=" << Pz_at << " Vx_at=" << Vx_at << " Vy_at=" << Vy_at << " Vz_at=" << Vz_at 
-		  << " EventWeight=" << EventWeight << " Nmuons=" << Id_sf.size() << std::endl;
+	if (Debug) std::cout << "CosmicMuonGenerator.cc: Theta_at=" << Theta_at << " phi_at=" << phi_at 
+			     << " Px_at=" << Px_at << " Py_at=" << Py_at << " Pz_at=" << Pz_at 
+			     << " T0_at=" << T0_at
+			     << " Vx_at=" << Vx_at << " Vy_at=" << Vy_at << " Vz_at=" << Vz_at 
+			     << " EventWeight=" << EventWeight << " Nmuons=" << Id_sf.size() << std::endl;
       }
     }
     

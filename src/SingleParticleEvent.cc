@@ -117,8 +117,8 @@ void SingleParticleEvent::propagate(double ElossScaleFac, double RadiusTarget, d
     bool continuePropagation = true;
     while (continuePropagation){
       if (tmpVy < -acceptR) continuePropagation = false;
-      if (0 < absVzTmp()){ //only check for MTCC setup in last step of propagation, need fine stepSize
-	//if (absVzTmp() < acceptZ && rVxyTmp() < acceptR){
+      //if (0 < absVzTmp()){ //only check for MTCC setup in last step of propagation, need fine stepSize
+      if (absVzTmp() < acceptZ && rVxyTmp() < acceptR){
 	if (fabs(tmpVz - Z_CentrTargetEff) < acceptZ && rVxyTmp() < acceptR){
 	  HitTarget = true;
 	  continuePropagation = false;
@@ -150,7 +150,6 @@ void SingleParticleEvent::propagate(double ElossScaleFac, double RadiusTarget, d
       if (continuePropagation) update(stepSize);
 
       int Mat = inMat(Vx,Vy,Vz, PlugVx, PlugVz);
-
       nMat[Mat]++;
     }
 
@@ -161,7 +160,6 @@ void SingleParticleEvent::propagate(double ElossScaleFac, double RadiusTarget, d
       double lClay = double(nMat[Clay])*stepSize;
       double lRock = double(nMat[Rock])*stepSize;      
       //double lUnknown = double(nMat[Unknown])*stepSize;
-
       waterEquivalents = (lAir*RhoAir + lWall*RhoWall + lRock*RhoRock
 				 + lClay*RhoClay + lPlug*RhoPlug) *ElossScaleFac/10.; // [mm/10]*[g cm^-3]
       subtractEloss(waterEquivalents);
@@ -188,13 +186,50 @@ void SingleParticleEvent::subtractEloss(double waterEquivalents){
   // parameters for standard rock (PDG 2004, page 230)
   double A = (1.91514 + 0.254957*L10E)/1000.;                         // a [GeV g^-1 cm^2]
   double B = (0.379763 + 1.69516*L10E - 0.175026*L10E*L10E)/1000000.; // b [g^-1 cm^2]
-  double EPS = A/B;                                                   // epsilon [GeV]
+  double EPS = A/B; // epsilon [GeV]
   E = (E + EPS)*exp(-B*waterEquivalents) - EPS; // updated energy
   double oldAbsMom = absmom();
   double newAbsMom = sqrt(E*E - MuonMass*MuonMass);
   Px = Px*newAbsMom/oldAbsMom;                  // updated px
   Py = Py*newAbsMom/oldAbsMom;                  // updated py
   Pz = Pz*newAbsMom/oldAbsMom;                  // updated pz
+}
+
+double SingleParticleEvent::Eloss(double waterEquivalents, double Energy){
+  double L10E = log10(Energy);
+  // parameters for standard rock (PDG 2004, page 230)
+  double A = (1.91514 + 0.254957*L10E)/1000.;                         // a [GeV g^-1 cm^2]
+  double B = (0.379763 + 1.69516*L10E - 0.175026*L10E*L10E)/1000000.; // b [g^-1 cm^2]
+  double EPS = A/B;                                                   // epsilon [GeV]
+  double newEnergy = (Energy + EPS)*exp(-B*waterEquivalents) - EPS; // updated energy
+  double EnergyLoss = Energy - newEnergy;
+  return EnergyLoss;
+}
+
+
+void SingleParticleEvent::setEug(double Eug) {
+  E_ug = Eug;
+}
+
+double SingleParticleEvent::Eug(){ return E_ug; }
+
+double SingleParticleEvent::deltaEmin(double E_sf) {
+  double dE = Eloss(waterEquivalents, E_sf);
+  return E_ug - (E_sf-dE);
+}
+
+
+void SingleParticleEvent::SurfProj(double Vx_in, double Vy_in, double Vz_in,
+				   double Px_in, double Py_in, double Pz_in,
+				   double& Vx_up, double& Vy_up, double& Vz_up) { 
+  //determine vertex of muon at Surface (+PlugWidth)
+  double P_in = sqrt(Px_in*Px_in + Py_in*Py_in + Pz_in*Pz_in);
+  double dy = Vy_in - (SurfaceOfEarth+PlugWidth);
+  Vy_up = Vy_in - dy;
+  Vx_up = Vx_in - dy*Px_in/Py_in; 	
+  Vz_up = Vz_in - dy*Pz_in/Py_in;
+  if (Debug) std::cout << "Vx_up=" << Vx_up << " Vy_up=" 
+		       << Vy_up << " Vz_up=" << Vz_up << std::endl;	
 }
 
 double SingleParticleEvent::absVzTmp(){

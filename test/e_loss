@@ -20,6 +20,8 @@
     double Vy_in = 0.;	
     double Vz_in = 0.;	
     
+
+    //determine vertex of muon at Surface (+PlugWidth)
     double P_in = sqrt(Px_in*Px_in + Py_in*Py_in + Pz_in*Pz_in);
     double dy = Vy_in - (SurfaceOfEarth+PlugWidth);
     double Vy_sf = Vy_in - dy;
