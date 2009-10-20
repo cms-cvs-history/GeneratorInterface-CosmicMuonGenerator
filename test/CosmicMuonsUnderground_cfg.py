@@ -18,8 +18,8 @@ process.CMSCGEN_out = cms.OutputModule("PoolOutputModule",
 
 process.outpath = cms.EndPath(process.CMSCGEN_out)
 
-#process.CosMuoGenSource.MinP = 10.
 process.CosMuoGenSource.MinP = 3.
+#process.CosMuoGenSource.MinP = 10.
 #process.CosMuoGenSource.MinP = 300.
 
 #process.CosMuoGenSource.MaxTheta = 80.
@@ -35,9 +35,10 @@ process.CosMuoGenSource.MaxTheta = 89.
 #process.CosMuoGenSource.TrackerOnly = True
 
 #Read in Multi muon events or generate single muon events (MultiMuon=false = default)
-#process.CosMuoGenSource.MultiMuon = True
-#process.CosMuoGenSource.MultiMuonNmin = 2
+# process.CosMuoGenSource.MultiMuon = True
+# process.CosMuoGenSource.MultiMuonNmin = 3
 #process.CosMuoGenSource.MultiMuonFileName = "MultiEventsIn.root"
+# process.CosMuoGenSource.MultiMuonFileName = "CORSIKA6900_3_10TeV_100k.root"
 ###process.CosMuoGenSource.MultiMuonFileFirstEvent = 1
  
 

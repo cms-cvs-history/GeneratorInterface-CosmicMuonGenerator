@@ -223,7 +223,6 @@ void SingleParticleEvent::SurfProj(double Vx_in, double Vy_in, double Vz_in,
 				   double Px_in, double Py_in, double Pz_in,
 				   double& Vx_up, double& Vy_up, double& Vz_up) { 
   //determine vertex of muon at Surface (+PlugWidth)
-  double P_in = sqrt(Px_in*Px_in + Py_in*Py_in + Pz_in*Pz_in);
   double dy = Vy_in - (SurfaceOfEarth+PlugWidth);
   Vy_up = Vy_in - dy;
   Vx_up = Vx_in - dy*Px_in/Py_in; 	

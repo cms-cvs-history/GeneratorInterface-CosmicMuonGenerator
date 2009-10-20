@@ -75,7 +75,7 @@
 
     double E_sf = x;	
     cout << "Newton: x=E_sf=" << x << endl;	
-    minEdiff = OneMuoEvt.deltaEmin(x);
+    double minEdiff = OneMuoEvt.deltaEmin(x);
     cout << "Newton: minEdiff=" << minEdiff << endl;	
 
 

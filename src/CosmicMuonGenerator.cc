@@ -71,7 +71,7 @@ void CosmicMuonGenerator::initialize(){
 	SimTree_jentry = 0;
       else 
 	SimTree_jentry = MultiMuonFileFirstEvent - 1; //1=1st evt (SimTree_jentry=0)
-
+      
       NcloseMultiMuonEvents = 0;
       NskippedMultiMuonEvents = 0;
     }
@@ -117,7 +117,7 @@ void CosmicMuonGenerator::nextEvent(){
     Ngen += (Nver-1.); //add number of generated vertices to initial cosmic events
     
     // complete event at surface
-    int                             id =  13; // mu-
+    int id =  13; // mu-
     if (Cosmics->momentum_times_charge() >0.) id = -13; // mu+
     double absMom = sqrt(E*E - MuonMass*MuonMass);
     double verMom = absMom*cos(Theta);
@@ -837,7 +837,7 @@ bool CosmicMuonGenerator::nextMultiEvent() {
 	  if (Debug) cout << "before: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu]; 
 	  T0_sf[imu] += T0diff;
 	  T0_ug[imu] += T0diff;
-	  //if (Debug) 
+	  if (Debug) 
 	    cout << "   after: T0_sf[" << imu << "]=" << T0_sf[imu] << "  T0_ug=" <<  T0_ug[imu] << endl;
 	}	
 	if (Debug) cout << "T0diff=" << T0diff << " T0_at=" << T0_at << endl;
